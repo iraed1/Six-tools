@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bench — A frontend skills workbench</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:        #21252B;
+    --panel:     #2A2F37;
+    --panel-2:   #323844;
+    --hole:      rgba(244,241,235,0.07);
+    --orange:    #FF6B35;
+    --steel:     #5B9BD5;
+    --ink:       #F4F1EB;
+    --muted:     #9AA1AC;
+    --line:      rgba(244,241,235,0.1);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, var(--hole) 1.6px, transparent 1.6px);
+    background-size:28px 28px;
+    background-color:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-weight:300;
+  }
+
+  ::selection{ background:var(--orange); color:var(--bg); }
+  a{ color:inherit; text-decoration:none; }
+
+  .display{
+    font-family:'Oswald', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; letter-spacing:0.03em; }
+
+  /* ---------- Nav ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:26px 6vw;
+    background:linear-gradient(to bottom, var(--bg) 60%, transparent);
+  }
+  .nav-mark{ font-family:'Oswald',sans-serif; font-size:20px; font-weight:600; letter-spacing:0.06em; }
+  .nav-mark .dot{ color:var(--orange); }
+  .nav-links{ display:flex; gap:36px; }
+  .nav-links a{ font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); transition:color .25s; }
+  .nav-links a:hover{ color:var(--orange); }
+  .nav-links a:focus-visible{ outline:1px solid var(--orange); outline-offset:4px; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:92vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:0 6vw; position:relative;
+  }
+  .tag-strip{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;
+  }
+  .tag{
+    font-size:11px; padding:6px 12px; border:1px solid var(--line);
+    border-radius:2px; color:var(--muted);
+  }
+  h1.hero-title{
+    font-size:clamp(2.6rem, 7vw, 5.2rem);
+    line-height:1.02;
+    max-width:920px;
+  }
+  h1.hero-title .accent{ color:var(--orange); }
+  .hero-sub{
+    margin-top:26px; max-width:520px; color:var(--muted);
+    font-size:16px; line-height:1.7;
+  }
+  .hero-cta{ margin-top:40px; display:flex; gap:18px; align-items:center; }
+  .btn-primary{
+    background:var(--orange); color:#1a1a1a; padding:13px 26px;
+    font-size:13px; font-weight:500; letter-spacing:0.04em; text-transform:uppercase;
+    border-radius:2px; transition:transform .25s, background .25s;
+    display:inline-block;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); background:#ffb08a; }
+  .btn-primary:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+  .btn-ghost{
+    font-size:13px; color:var(--muted); border-bottom:1px solid var(--line);
+    padding-bottom:2px; transition:color .25s, border-color .25s;
+  }
+  .btn-ghost:hover{ color:var(--ink); border-color:var(--ink); }
+
+  .hero-note{
+    position:absolute; bottom:44px; right:6vw;
+    font-size:11px; color:var(--muted); max-width:220px; text-align:right; line-height:1.6;
+  }
+
+  /* ---------- Section shell ---------- */
+  section{ padding:120px 6vw; max-width:1220px; margin:0 auto; }
+  .section-head{ max-width:600px; margin-bottom:64px; }
+  .section-head .kicker{ font-size:11px; color:var(--orange); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:14px; display:block; }
+  .section-head h2{ font-size:clamp(1.8rem,3.4vw,2.6rem); }
+  .section-head p{ margin-top:16px; color:var(--muted); font-size:15px; line-height:1.7; max-width:520px; }
+
+  /* ---------- Pegboard grid ---------- */
+  .pegboard{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .tool{
+    background:var(--panel);
+    padding:34px 30px 30px;
+    display:flex; flex-direction:column;
+    min-height:340px;
+    position:relative;
+  }
+  .tool::before{
+    content:'';
+    position:absolute; top:14px; left:14px;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--hole); box-shadow:0 0 0 3px rgba(244,241,235,0.03);
+  }
+  .tool-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:18px;
+  }
+  .tool-label h3{ font-family:'Oswald',sans-serif; font-size:16px; letter-spacing:0.03em; }
+  .tool-label .tno{ font-size:11px; color:var(--muted); }
+  .tool-desc{ font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+  .tool-demo{
+    margin-top:auto;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:20px;
+    display:flex; align-items:center; justify-content:center;
+    min-height:120px;
+  }
+
+  /* --- demo: toggle + counter --- */
+  .demo-switch-row{ display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; }
+  .switch{
+    width:52px; height:28px; border-radius:16px; background:#454C57;
+    position:relative; cursor:pointer; transition:background .25s; border:none;
+  }
+  .switch.on{ background:var(--orange); }
+  .switch .knob{
+    position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%;
+    background:var(--ink); transition:transform .25s;
+  }
+  .switch.on .knob{ transform:translateX(24px); }
+  .counter-btn{
+    background:none; border:1px solid var(--line); color:var(--ink);
+    padding:8px 16px; border-radius:2px; font-size:12px; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; transition:border-color .2s;
+  }
+  .counter-btn:hover{ border-color:var(--orange); }
+
+  /* --- demo: gradient generator --- */
+  .demo-gradient{ width:100%; display:flex; flex-direction:column; gap:12px; align-items:center; }
+  .swatch{ width:100%; height:52px; border-radius:3px; border:1px solid var(--line); }
+  .color-row{ display:flex; gap:10px; }
+  .color-row input[type=color]{
+    width:34px; height:34px; border:none; background:none; cursor:pointer; padding:0;
+  }
+
+  /* --- demo: typography scale --- */
+  .demo-type{ width:100%; text-align:center; }
+  .demo-type .sample{ font-family:'Oswald',sans-serif; transition:font-size .1s, font-weight .1s; }
+  .demo-type input[type=range]{ width:100%; margin-top:14px; accent-color:var(--orange); }
+
+  /* --- demo: validation --- */
+  .demo-form{ width:100%; display:flex; flex-direction:column; gap:8px; }
+  .demo-form input{
+    background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    padding:9px 12px; font-size:13px; border-radius:2px; font-family:'Inter',sans-serif;
+    width:100%;
+  }
+  .demo-form input:focus{ outline:none; border-color:var(--steel); }
+  .demo-form .hint{ font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+  .demo-form .hint.ok{ color:#7FD68A; }
+  .demo-form .hint.bad{ color:var(--orange); }
+
+  /* --- demo: particles canvas --- */
+  .demo-canvas-wrap{ width:100%; height:110px; position:relative; }
+  .demo-canvas-wrap canvas{ width:100%; height:100%; display:block; }
+  .demo-canvas-wrap .hint-overlay{
+    position:absolute; bottom:4px; left:0; right:0; text-align:center;
+    font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace;
+  }
+
+  /* --- demo: layout toggle --- */
+  .demo-layout{ width:100%; }
+  .layout-boxes{
+    display:grid; gap:6px; margin-top:12px;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .layout-boxes.stacked{ grid-template-columns:1fr; }
+  .layout-boxes div{
+    background:var(--steel); opacity:0.7; border-radius:2px; height:18px;
+  }
+  .layout-toggle-btn{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    font-size:11px; padding:6px 12px; border-radius:2px; cursor:pointer;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .layout-toggle-btn:hover{ color:var(--ink); border-color:var(--steel); }
+
+  /* ---------- Bench (code/output) ---------- */
+  .bench{
+    border:1px solid var(--line); border-radius:4px; overflow:hidden;
+    display:grid; grid-template-columns:1fr 1fr;
+  }
+  .bench-pane{ padding:0; }
+  .bench-pane.code{
+    background:#1B1E23; border-right:1px solid var(--line);
+  }
+  .bench-pane.code pre{
+    padding:28px; font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    line-height:1.7; color:#B8C4D0; overflow-x:auto;
+  }
+  .bench-pane.code .kw{ color:var(--orange); }
+  .bench-pane.code .str{ color:#7FD68A; }
+  .bench-pane.code .tag{ color:var(--steel); }
+  .bench-pane.render{
+    background:var(--panel); display:flex; align-items:center; justify-content:center; padding:40px;
+  }
+  .render-card{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+    padding:26px; width:100%; max-width:280px;
+  }
+  .render-card h4{ font-family:'Oswald',sans-serif; font-size:14px; margin-bottom:8px; }
+  .render-card p{ font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.5; }
+  .render-card button{
+    background:var(--orange); border:none; color:#1a1a1a; padding:9px 18px;
+    font-size:12px; border-radius:2px; cursor:pointer; font-weight:500;
+  }
+
+  /* ---------- Notes / testimony strip ---------- */
+  .tags-strip{ display:flex; flex-wrap:wrap; gap:12px; }
+  .tags-strip .pill{
+    border:1px solid var(--line); padding:10px 18px; border-radius:20px;
+    font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px;
+  }
+  .tags-strip .pill .n{ width:6px; height:6px; border-radius:50%; background:var(--orange); }
+
+  /* ---------- Closing ---------- */
+  .closing{ text-align:center; padding-bottom:160px; }
+  .closing h2{ font-size:clamp(2rem,5vw,3.4rem); max-width:740px; margin:0 auto; }
+  .closing h2 .accent{ color:var(--orange); }
+  .closing .hero-cta{ justify-content:center; margin-top:36px; }
+
+  footer{
+    border-top:1px solid var(--line); padding:36px 6vw;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color:var(--muted);
+  }
+
+  @media (max-width:860px){
+    .nav-links{ display:none; }
+    .pegboard{ grid-template-columns:1fr; }
+    .bench{ grid-template-columns:1fr; }
+    .bench-pane.code{ border-right:none; border-bottom:1px solid var(--line); }
+    section{ padding:80px 6vw; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-mark">BENCH<span class="dot">.</span></div>
+  <div class="nav-links">
+    <a href="#tools">Skills</a>
+    <a href="#bench">The bench</a>
+    <a href="#proof">Proof</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="tag-strip mono">
+    <span class="tag">HTML5</span>
+    <span class="tag">CSS3 / Grid / Flexbox</span>
+    <span class="tag">Vanilla JS</span>
+    <span class="tag">Accessibility</span>
+    <span class="tag">Responsive</span>
+  </div>
+  <h1 class="hero-title display">Six tools.<br>All <span class="accent">working</span>, not just listed.</h1>
+  <p class="hero-sub">This isn't a page describing frontend skills — every panel below is a real, functioning piece of interface. Flip the switches. Nothing here is a screenshot.</p>
+  <div class="hero-cta">
+    <a href="#tools" class="btn-primary">Try the tools</a>
+    <a href="#bench" class="btn-ghost">See the code →</a>
+  </div>
+  <div class="hero-note mono">EVERY DEMO ON THIS PAGE IS LIVE — NO SCREENSHOTS, NO MOCKUPS</div>
+</section>
+
+<section id="tools">
+  <div class="section-head">
+    <span class="kicker mono">On the pegboard</span>
+    <h2 class="display">Reach up, take one down.</h2>
+    <p>Six panels, six fundamentals. Interact with each one — the skill is in how it feels, not just how it looks.</p>
+  </div>
+
+  <div class="pegboard">
+
+    <div class="tool">
+      <div class="tool-label"><h3>State &amp; Interaction</h3><span class="tno mono">01</span></div>
+      <p class="tool-desc">A toggle and a counter — the two smallest units of interactive state, wired up for real.</p>
+      <div class="tool-demo">
+        <div class="demo-switch-row">
+          <button class="switch" id="switchDemo" aria-pressed="false" aria-label="Toggle demo switch"><span class="knob"></span></button>
+          <button class="counter-btn" id="counterBtn">CLICKED: 0</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-label"><h3>Color &amp; Theming</h3><span class="tno mono">02</span></div>
+      <p class="tool-desc">Pick two colors, watch the gradient recompute live — no page reload, no build step.</p>
+      <div class="tool-demo">
+        <div class="demo-gradient">
+          <div class="swatch" id="gradSwatch"></div>
+          <div class="color-row">
+            <input type="color" id="colorA" value="#FF6B35">
+            <input type="color" id="colorB" value="#5B9BD5">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-label"><h3>Typography Scale</h3><span class="tno mono">03</span></div>
+      <p class="tool-desc">Drag to feel a real type scale move — size and weight tied together, the way a good scale should be.</p>
+      <div class="tool-demo">
+        <div class="demo-type">
+          <div class="sample" id="typeSample" style="font-size:22px; font-weight:500;">Aa Bench</div>
+          <input type="range" id="typeRange" min="14" max="64" value="22">
+        </div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-label"><h3>Live Validation</h3><span class="tno mono">04</span></div>
+      <p class="tool-desc">Type an email. The hint below updates as you go, not after a submit.</p>
+      <div class="tool-demo">
+        <div class="demo-form">
+          <input type="text" id="emailInput" placeholder="you@example.com" autocomplete="off">
+          <span class="hint mono" id="emailHint">Waiting for input…</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-label"><h3>Canvas &amp; Motion</h3><span class="tno mono">05</span></div>
+      <p class="tool-desc">A small particle field, animated frame by frame on a canvas — move your cursor over it.</p>
+      <div class="tool-demo">
+        <div class="demo-canvas-wrap">
+          <canvas id="particleCanvas"></canvas>
+          <div class="hint-overlay">HOVER TO DISTURB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-label"><h3>Responsive Layout</h3><span class="tno mono">06</span></div>
+      <p class="tool-desc">Toggle between a row and a stack — the same layout logic that makes a page work on any screen.</p>
+      <div class="tool-demo">
+        <div class="demo-layout">
+          <button class="layout-toggle-btn" id="layoutToggle">STACK ↕</button>
+          <div class="layout-boxes" id="layoutBoxes">
+            <div></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="bench">
+  <div class="section-head">
+    <span class="kicker mono">The workbench</span>
+    <h2 class="display">What's written, rendered next to it.</h2>
+    <p>No layer of translation between the two panes — this is the actual markup producing the actual card beside it.</p>
+  </div>
+  <div class="bench">
+    <div class="bench-pane code">
+<pre><span class="tag">&lt;div</span> class="card"<span class="tag">&gt;</span>
+  <span class="tag">&lt;h4&gt;</span>Session saved<span class="tag">&lt;/h4&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Your changes are<br>
+     kept for next time.<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;button</span> onclick=<span class="str">"save()"</span><span class="tag">&gt;</span>
+    Save again
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="kw">function</span> save() {
+  <span class="kw">const</span> btn = event.target;
+  btn.textContent = <span class="str">"Saved ✓"</span>;
+  setTimeout(() =&gt;
+    btn.textContent = <span class="str">"Save again"</span>,
+  1200);
+}</pre>
+    </div>
+    <div class="bench-pane render">
+      <div class="render-card">
+        <h4>Session saved</h4>
+        <p>Your changes are kept for next time.</p>
+        <button id="saveBtn" onclick="
+          this.textContent='Saved ✓';
+          clearTimeout(window.__t);
+          window.__t=setTimeout(()=>{this.textContent='Save again'},1200);
+        ">Save again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proof">
+  <div class="section-head">
+    <span class="kicker mono">Standards, not opinions</span>
+    <h2 class="display">The unglamorous half of the craft.</h2>
+    <p>The parts that don't show up in a screenshot but decide whether the page actually works for everyone.</p>
+  </div>
+  <div class="tags-strip">
+    <span class="pill"><span class="n"></span>Keyboard-navigable, visible focus rings</span>
+    <span class="pill"><span class="n"></span>Respects prefers-reduced-motion</span>
+    <span class="pill"><span class="n"></span>Semantic HTML, not div soup</span>
+    <span class="pill"><span class="n"></span>Fluid down to 320px wide</span>
+    <span class="pill"><span class="n"></span>No layout shift on load</span>
+    <span class="pill"><span class="n"></span>Contrast-checked text on every background</span>
+  </div>
+</section>
+
+<section class="closing" id="contact">
+  <span class="kicker mono">Get in touch</span>
+  <h2 class="display">Ready to put this on <span class="accent">your</span> project?</h2>
+  <div class="hero-cta">
+    <a href="#" class="btn-primary">Start a project</a>
+  </div>
+</section>
+
+<footer>
+  <div class="nav-mark">BENCH<span class="dot" style="color:var(--orange)">.</span></div>
+  <div class="mono">© 2026 — BUILT, NOT TEMPLATED</div>
+</footer>
+
+<script>
+  // 01 — switch + counter
+  const switchDemo = document.getElementById('switchDemo');
+  switchDemo.addEventListener('click', () => {
+    const isOn = switchDemo.classList.toggle('on');
+    switchDemo.setAttribute('aria-pressed', isOn);
+  });
+  let count = 0;
+  const counterBtn = document.getElementById('counterBtn');
+  counterBtn.addEventListener('click', () => {
+    count++;
+    counterBtn.textContent = `CLICKED: ${count}`;
+  });
+
+  // 02 — gradient generator
+  const colorA = document.getElementById('colorA');
+  const colorB = document.getElementById('colorB');
+  const gradSwatch = document.getElementById('gradSwatch');
+  function updateGradient(){
+    gradSwatch.style.background = `linear-gradient(120deg, ${colorA.value}, ${colorB.value})`;
+  }
+  colorA.addEventListener('input', updateGradient);
+  colorB.addEventListener('input', updateGradient);
+  updateGradient();
+
+  // 03 — type scale
+  const typeRange = document.getElementById('typeRange');
+  const typeSample = document.getElementById('typeSample');
+  typeRange.addEventListener('input', () => {
+    const v = typeRange.value;
+    typeSample.style.fontSize = v + 'px';
+    typeSample.style.fontWeight = v > 40 ? 600 : v > 26 ? 500 : 400;
+  });
+
+  // 04 — live validation
+  const emailInput = document.getElementById('emailInput');
+  const emailHint = document.getElementById('emailHint');
+  emailInput.addEventListener('input', () => {
+    const val = emailInput.value;
+    if(val.length === 0){
+      emailHint.textContent = 'Waiting for input…';
+      emailHint.className = 'hint mono';
+    } else if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+      emailHint.textContent = 'Looks like a valid email ✓';
+      emailHint.className = 'hint mono ok';
+    } else {
+      emailHint.textContent = 'Not a valid email yet…';
+      emailHint.className = 'hint mono bad';
+    }
+  });
+
+  // 05 — particle canvas
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let cw, ch, particles = [];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resizeCanvas(){
+    cw = canvas.width = canvas.clientWidth;
+    ch = canvas.height = canvas.clientHeight;
+    particles = Array.from({length: 40}, () => ({
+      x: Math.random()*cw, y: Math.random()*ch,
+      vx: (Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4,
+      r: Math.random()*2+1
+    }));
+  }
+  let px = -999, py = -999;
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    px = e.clientX - rect.left; py = e.clientY - rect.top;
+  });
+  canvas.addEventListener('mouseleave', () => { px=-999; py=-999; });
+
+  function animateParticles(){
+    ctx.clearRect(0,0,cw,ch);
+    particles.forEach(p => {
+      const dx = p.x-px, dy = p.y-py;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < 50){
+        p.vx += dx/dist*0.03; p.vy += dy/dist*0.03;
+      }
+      p.vx *= 0.98; p.vy *= 0.98;
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>cw) p.vx*=-1;
+      if(p.y<0||p.y>ch) p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(91,155,213,0.8)';
+      ctx.fill();
+    });
+    if(!reduceMotion) requestAnimationFrame(animateParticles);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  animateParticles();
+  if(reduceMotion){
+    ctx.clearRect(0,0,cw,ch);
+    particles.forEach(p=>{
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(91,155,213,0.8)'; ctx.fill();
+    });
+  }
+
+  // 06 — layout toggle
+  const layoutToggle = document.getElementById('layoutToggle');
+  const layoutBoxes = document.getElementById('layoutBoxes');
+  layoutToggle.addEventListener('click', () => {
+    const stacked = layoutBoxes.classList.toggle('stacked');
+    layoutToggle.textContent = stacked ? 'ROW ↔' : 'STACK ↕';
+  });
+</script>
+
+</body>
+</html>
